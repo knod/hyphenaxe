@@ -195,7 +195,8 @@
 		* up the word into bits and adding whatever `separator` is
 		*/
 			var split 	 = [],
-				sepRegex = new RegExp(separator + '$');
+				regStr 	 = separator.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"),
+				sepRegex = new RegExp(regStr + '$');
 
 			// Build the list of strings with the right number of letters
 			// as determined by the map
