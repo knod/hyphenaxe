@@ -228,12 +228,24 @@
 		// =====================================
 
 		var options = {
+			// (Fairly simple)
 			// The symbol or symbols that will separate each string
 			separator: '-',
+			
+			// (Intermediate)
 			// The number of characters desired as a minimum for the last 
 			// string chunk (given as a fraction of the maximum characters
 			// allowed in each result string)
 			fractionOfMax: 0.75,
+
+			// (Advanced)
+			// A function that makes the string chunks of the word more
+			// evenly distributed. It takes an array of already evenly
+			// distributed strings that do not include the last chunk,
+			// an integer representing how many are desired in the last
+			// chunk, and an integer of how many are currently slated
+			// for being in the last chunk. Check out the default function
+			// for more details
 			redistribute: defaultRedistribute
 		}
 
