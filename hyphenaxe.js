@@ -233,7 +233,7 @@
 			// The number of characters desired as a minimum for the last 
 			// string chunk (given as a fraction of the maximum characters
 			// allowed in each result string)
-			fractionOfMax: 0.5,
+			fractionOfMax: 0.75,
 			redistribute: defaultRedistribute
 		}
 

@@ -10,10 +10,13 @@
 	<script src='hyphenaxe.js'></script>
 	<script>
 		var input = '123123123';
-		console.log( 'input:', input, hyphenaxe(input, 3) )
-		input = '123123'
-		console.log( 'input:', input, hyphenaxe(input, 3) )
-		console.log( 'input:', input, hyphenaxe(input, 5) )
+		console.log( '1:', input, hyphenaxe(input, 3) );
+		input = '123123';
+		console.log( '2:', input, hyphenaxe(input, 3) );
+		console.log( '3:', input, hyphenaxe(input, 5) );
+		var sep = '**';
+		console.log( '4:', input, hyphenaxe(input, 5, {separator: sep} ) );
+		console.log( '5:', input, hyphenaxe( input, 5, {fractionOfMax: 0.5} ) );
 	</script>
 </body>
 </html>
