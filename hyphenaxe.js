@@ -42,6 +42,11 @@
 	* Note: The separator will be counted in the number of characters
 	* in a unit. That is, 'abso-' will be counted as 5 characters,
 	* where '-' is the separator.
+	* 
+	* Ex1: hyphenaxe( '123123123', 3 ) returns: ['12-', '31-', '23-', '123']
+	* Ex2: hyphenaxe( '123123', 3 ) returns: ["12-", "31-", "23"]
+	* Ex3: hyphenaxe( '123123', 5 ) returns: ["1231-", "23"]
+	* Ex4: hyphenaxe( '123123', 5, {fractionOfMax: 0.75} ) returns: ["123-", "123"]
 	*/
 		// =====================================
 		// ========= QUICK AS WE CAN ===========
@@ -55,88 +60,83 @@
 
 
 		// =====================================
-		// =============== SETUP ===============
-		// =====================================
-
-		var options = {
-			// The symbol or symbols that will separate each string
-			separator: '-',
-			// The number of characters desired as a minimum for the last 
-			// string (given as a fraction of the maximum characters allowed
-			// in each result string)
-
-			// ?? Can be false, I suppose? For min value? Or 1%?
-			fractionOfMax: 0.5
-		}
-
-		userOptions = userOptions || {};
-
-		for (let key in options) {
-			if ( userOptions[key] ) {options[key] = userOptions[key] }
-		}
-
-
-
-		// =====================================
 		// =========== CALCULATIONS ============
 		// =====================================
 
-
-		var unevenly = function ( word, maxChars, minForLast ) {
-		/* ( str, int, int )
+		var redistribute = function ( chunkMap, numInLastStr, toBeMadeUp  ) {
+		/* ( [int], int, int ) -> [ Int ]
 		* 
-		* Redistribute the unevenness
+		* Default redistribution function
+		* 
+		* Redistributes number of characters in each chunk to
+		* make sure the last chunk has the `wanted` number of characters
+		* 
+		* Right now: letters are removed from the starting strings in
+		* order to make up for the last string
 		*/
-			var chunkMap = [];
+			var loopAt 		= chunkMap.length,
+				indx   		= 0;
 
-			// Find how much would remain after dividing the string evenly
-			// If there's an imbalance, redistribute a bit (future option as to how?)
-			var evenly = Math.floor(word.length/maxWithSeparator);
-
-			// ---- last chunk ----
-			var remainder 	= word.length % maxWithSeparator,  // actually left over
-				wanted 		= Math.max( minForLast, remainder );  // whatever's bigger
-				missing 		= wanted - remainder;  // what's missing
-
-			// Redistribute to get that result (in a somewhat sensical? way)
-			// Right now: letters are removed from the starting strings in
-			// order to make up for the last string (really I'd rather take from
-			// every other group, visiting all eventually (0, 2, 4, 1, 3),
-			// but this is just proof of concept)
-
-			// Don't include last chunk. Addd that in after.
-			for (let counti = 0; counti < evenly; counti++) {
-				chunkMap.push( maxWithSeparator );
-			};
-
-			var loopAt = chunkMap.length,
-				indx   = 0;
-			while ( missing > 0 ) {
-
+			// Keep looping around the non-last ones until the subtraction of
+			// characters is evenly distributed, starting with the first chunk
+			while ( toBeMadeUp > 0 ) {
 				// Whatever number is here, subtract one
-				// (It'll be included on that last chunk)
+				// (It's going to be in that last chunk)
 				chunkMap[indx] = chunkMap[indx] - 1;
 
-				indx 	= indx + 1;
+				indx 		= indx + 1;
 				// Start from the beginning string again if more need to be redistributed
-				indx 	= indx % loopAt;
-				missing 	= missing - 1;
+				indx 		= indx % loopAt;
+				toBeMadeUp  = toBeMadeUp - 1;
 			}
+			// Add that last one back in
+			chunkMap.push( numInLastStr );
+// console.log('after redistribute:', chunkMap);
+			return chunkMap;
+		};  // End redistribute()
 
-			chunkMap.push( wanted );
+
+		var unevenly = function ( word, maxWithSep, options ) {
+		/* ( str, int, int )
+		* 
+		* Break up the word unevenly, redistributing a bit if necessary
+		*/
+			var chunkMap 		= [],
+				remainderEvenly = Math.floor( word.length/maxWithSep );
+
+			// ---- last chunk ----
+			// Find how much would remain after dividing the string evenly
+
+			var remainder 	= word.length % maxWithSep,  // actually left over
+				userMin 	= Math.floor( maxNumChars * options.fractionOfMax ),
+				wanted 		= Math.max( userMin, remainder ),  // if we have more than min, use that
+				toBeMadeUp 	= wanted - remainder;
+			// console.log( 'remainder:', remainder, 'min:', userMin, 'wanted:', wanted, 'toBeMadeUp:', toBeMadeUp )
+
+			// Don't include last chunk. Add that in after if needed, along with redistribution.
+			for (let counti = 0; counti < remainderEvenly; counti++) {
+				// console.log('push one. count:', counti, 'total:', remainderEvenly)
+				chunkMap.push( maxWithSep );
+			};
+			// console.log('after first loop:', chunkMap.slice())
+
+			// If there's an imbalance, redistribute a bit
+			if (remainder !== 0 ) {
+				chunkMap = options.redistribute( chunkMap, wanted, toBeMadeUp )
+			}
 
 			return chunkMap;
 		};  // End unevenly()
 
 
 		var makeCharsMap = function ( word, maxNumChars, options ) {
-		/* ( str, int ) -> [Int]
+		/* ( str, int ) -> [ Int ]
 		* 
 		* Return an array of integers represeting the length
 		* of each group into which the word will be broken up
 		* 
-		* Ex1: makeCharsMap( '123123123', 3 ) returns: ['12-', '31-', '23-', '123']
-		* Ex2: makeCharsMap( '123123', 3 ) returns: ["1-", "23-", "12-", "3"]
+		* Ex1: makeCharsMap( '123123123', 3 ) returns: [2, 2, 2, 3]
+		* Ex2: makeCharsMap( '123123', 3 ) returns: [2, 2, 2]
 		*/
 
 			var chunkMap = [];
@@ -177,44 +177,8 @@
 			// Otherwise, we kind of have to start from scratch
 			} else {
 
-				// word, maxWithSep, options
-
-				var remainderEvenly = Math.floor(word.length/maxWithSeparator);
-
-				// ---- last chunk ----
-				// Find how much would remain after dividing the string evenly
-				// If there's an imbalance, redistribute a bit (future option?)
-
-				var remainder 	= word.length % maxWithSeparator,  // actually left over
-					min 		= Math.floor( maxNumChars * options.fractionOfMax ),
-					needed 		= Math.max( min, remainder );  // whatever's bigger
-
-				// Redistribute to get that result (in a somewhat sensical? way)
-				// Right now: letters are removed from the starting strings in
-				// order to make up for the last string (really I'd rather take from
-				// every other group, visiting all eventually (0, 2, 4, 1, 3),
-				// but this is just proof of concept)
-
-				// Don't include last chunk. Addd that in after.
-				for (let counti = 0; counti < remainderEvenly; counti++) {
-					chunkMap.push( maxWithSeparator );
-				};
-
-				var loopAt 		= chunkMap.length,
-					indx   		= 0;
-				while ( needed > 0 ) {
-
-					// Whatever number is here, subtract one
-					// (It'll be included on that last chunk)
-					chunkMap[indx] = chunkMap[indx] - 1;
-
-					indx 	= indx + 1;
-					// Start from the beginning string again if more need to be redistributed
-					indx 	= indx % loopAt;
-					needed 	= needed - 1;
-				}
-
-				chunkMap.push( min );
+				// When the distribution is uneven, try to even it out a bit
+				chunkMap = unevenly( word, maxWithSeparator, options )
 			}  // end if splits "evenly"
 
 			return chunkMap;
@@ -253,6 +217,30 @@
 
 			return split;
 		};  // End splitUsingMap()
+
+
+
+		// =====================================
+		// =============== SETUP ===============
+		// =====================================
+
+		var options = {
+			// The symbol or symbols that will separate each string
+			separator: '-',
+			// The number of characters desired as a minimum for the last 
+			// string (given as a fraction of the maximum characters allowed
+			// in each result string)
+
+			// ?? Can be false, I suppose? For min value? Or 1%?
+			fractionOfMax: 0.5,
+			redistribute: redistribute
+		}
+
+		userOptions = userOptions || {};
+
+		for (let key in options) {
+			if ( userOptions[key] ) { options[key] = userOptions[key] }
+		}
 
 
 

@@ -9,7 +9,11 @@
 	<div></div>
 	<script src='hyphenaxe.js'></script>
 	<script>
-		console.log( hyphenaxe('123123', 3) )
+		var input = '123123123';
+		console.log( 'input:', input, hyphenaxe(input, 3) )
+		input = '123123'
+		console.log( 'input:', input, hyphenaxe(input, 3) )
+		console.log( 'input:', input, hyphenaxe(input, 5) )
 	</script>
 </body>
 </html>
