@@ -63,17 +63,19 @@
 		// =========== CALCULATIONS ============
 		// =====================================
 
-		var redistribute = function ( chunkMap, numInLastStr, toBeMadeUp  ) {
+		var defaultRedistribute = function ( chunkMap, numInLastStr, currentlyLeftOver ) {
 		/* ( [int], int, int ) -> [ Int ]
 		* 
 		* Default redistribution function
 		* 
 		* Redistributes number of characters in each chunk to
-		* make sure the last chunk has the `wanted` number of characters
+		* make sure the last chunk has the `numInLastStr` number of characters
 		* 
 		* Right now: letters are removed from the starting strings in
 		* order to make up for the last string
 		*/
+			var toBeMadeUp 	= numInLastStr - currentlyLeftOver;
+
 			var loopAt 		= chunkMap.length,
 				indx   		= 0;
 
@@ -89,11 +91,12 @@
 				indx 		= indx % loopAt;
 				toBeMadeUp  = toBeMadeUp - 1;
 			}
+
 			// Add that last one back in
 			chunkMap.push( numInLastStr );
 // console.log('after redistribute:', chunkMap);
 			return chunkMap;
-		};  // End redistribute()
+		};  // End defaultRedistribute()
 
 
 		var unevenly = function ( word, maxWithSep, options ) {
@@ -109,8 +112,7 @@
 
 			var remainder 	= word.length % maxWithSep,  // actually left over
 				userMin 	= Math.floor( maxNumChars * options.fractionOfMax ),
-				wanted 		= Math.max( userMin, remainder ),  // if we have more than min, use that
-				toBeMadeUp 	= wanted - remainder;
+				wanted 		= Math.max( userMin, remainder );  // if we have more than min, use that
 			// console.log( 'remainder:', remainder, 'min:', userMin, 'wanted:', wanted, 'toBeMadeUp:', toBeMadeUp )
 
 			// Don't include last chunk. Add that in after if needed, along with redistribution.
@@ -122,7 +124,7 @@
 
 			// If there's an imbalance, redistribute a bit
 			if (remainder !== 0 ) {
-				chunkMap = options.redistribute( chunkMap, wanted, toBeMadeUp )
+				chunkMap = options.redistribute( chunkMap, wanted, remainder )
 			}
 
 			return chunkMap;
@@ -228,12 +230,10 @@
 			// The symbol or symbols that will separate each string
 			separator: '-',
 			// The number of characters desired as a minimum for the last 
-			// string (given as a fraction of the maximum characters allowed
-			// in each result string)
-
-			// ?? Can be false, I suppose? For min value? Or 1%?
+			// string chunk (given as a fraction of the maximum characters
+			// allowed in each result string)
 			fractionOfMax: 0.5,
-			redistribute: redistribute
+			redistribute: defaultRedistribute
 		}
 
 		userOptions = userOptions || {};
@@ -249,8 +249,7 @@
 		// ============ DO THE DEED ============
 		// =====================================
 
-		var separator 	= options.separator,
-			minLastStr 	= options.fractionOfMax;
+		var separator 	= options.separator;
 
 		var chunkMap = makeCharsMap( wordStr, maxNumChars, options ),
 			chunks 	 = splitUsingMap( wordStr, chunkMap, separator );
