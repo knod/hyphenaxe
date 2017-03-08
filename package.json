@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/knod/hyphenaxe/issues"
   },
-  "homepage": "https://github.com/knod/hyphenaxe#readme"
+  "homepage": "https://github.com/knod/hyphenaxe#readme",
+  "devDependencies": {
+    "jasmine": "^2.5.3"
+  }
 }
