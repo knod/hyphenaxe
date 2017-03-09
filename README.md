@@ -8,19 +8,19 @@ The separation symbol doesn't have to be a hyphen, it can be any string, but any
 ```js
 var axe = require( "hyphenaxe" );
 
-hyphenaxe( "123123123", 3 );
+axe( "123123123", 3 );
 // returns ["12-", "31-", "23-", "123"]
 
-hyphenaxe( "123123", 3 );
+axe( "123123", 3 );
 // returns ["12-", "31-", "23"]
 
-hyphenaxe( "123123", 5 );
+axe( "123123", 5 );
 // returns ["123-", "123"]
 
-hyphenaxe( "123123", 5, {separator: "**"} );
+axe( "123123", 5, {separator: "**"} );
 // returns ["123**", "123"]
 
-hyphenaxe( "123123", 5, {fractionOfMax: 0.5} );
+axe( "123123", 5, {fractionOfMax: 0.5} );
 // returns ["1231-", "23"]
 ```
 
