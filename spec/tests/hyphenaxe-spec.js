@@ -17,7 +17,7 @@ describe("hyphenaxe,", function() {
   };  // End isAnArrayOfStrings()
 
 
-  describe("given", function() {
+  describe("given (an) UNEXPECTED VALUE(S)", function() {
 
     describe("a NON-STRING value for a first argument,", function() {
       it('should throw a TYPE error', function() {
@@ -280,7 +280,7 @@ describe("hyphenaxe,", function() {
 
     });  // End "options.redistribute: Unexpected type"
 
-  });  // End _UNEXPECTED TYPE_
+  });  // End _UNEXPECTED VALUES_
 
 
 
@@ -338,8 +338,7 @@ describe("hyphenaxe,", function() {
       });
 
       it("should return an array of strings in which every string except the last one is terminated with a hyphen", function() {
-          var max = 3, result = axe( '123123', max );
-          expect( result ).toEqual( ['12-', '31-', '23'] );
+          expect( axe( '123123', 3 ) ).toEqual( ['12-', '31-', '23'] );
           // Other tests?
       });
 
@@ -380,7 +379,7 @@ describe("hyphenaxe,", function() {
         });
       });
 
-      describe("when given a string with punctuation or spaces or tabs,", function() {
+      describe("and a string with punctuation or spaces or tabs,", function() {
         it('should treat those characters just like any other character', function() {
 
           expect( axe( '1.2',   2 ) ).toEqual( ['1-', '.2'] );
@@ -390,41 +389,80 @@ describe("hyphenaxe,", function() {
         });
       });
 
-      // ??: What about new lines?
-
-      // ========== CUSTOM OPTIONS ==========
-      describe("options.separator: expected type", function() {
-
-      });  // End "options.separator: expected type"
-
-
-
-      describe("options.fractionOfMax: expected type", function() {
-
-      });  // End "options.fractionOfMax: expected type"
-
-
-
-      describe("options.redistribute: expected type", function() {
-
-      });  // End "options.redistribute: expected type"
+      describe("and a string with new line characters,", function() {
+      // ??: What about new lines? Should they be accepted at all?
+        xit('~~WHAT SHOULD IT DO?~~');
+      });
 
     });  // End "where `str.length > posInt`"
 
 
+
+    // ========== CUSTOM OPTIONS ==========
+    // --- separator ---
+    describe("and a custom separator (with options.separator)", function() {
+      it("should return strings terminated in that given separator", function() {
+        expect( axe( '123', 2, {separator: '@'} ) ).toEqual( ['1@', '23'] );
+      });
+
+      describe("of a different length than the default one", function() {
+        it("should return strings terminated in that given separator with the length accounted for", function() {
+          expect( axe( '1234', 3, {separator: '--'} ) ).toEqual( ['1--', '234'] );
+        });
+      });
+
+      describe("that's an empty string", function() {
+        it("should return strings terminated with nothing and with that lack of length accounted for", function() {
+          expect( axe( '123', 2, {separator: ''} ) ).toEqual( ['12','3'] );
+          expect( axe( '1234', 3, {separator: ''} ) ).toEqual( ['12', '34'] );
+        });
+      });
+
+      describe("that's a regex symbol", function() {
+        it("should return escape that/those charcters properly and return the expected value", function() {
+          expect( axe( '123', 2, {separator: '*'} ) ).toEqual( ['1*', '23'] );
+          expect( axe( '1234', 3, {separator: '..'} ) ).toEqual( ['1..', '234'] );
+        });
+      });
+
+      describe("that's on a boundry and matches the text that's on that boundry", function() {
+        it("should not repeat the custom separator", function() {
+          expect( axe( '1*23', 3, {separator: '*'} ) ).toEqual( ['1*', '23'] );
+          expect( axe( '1--234', 5, {separator: '--'} ) ).toEqual( ['1--', '234'] );
+        });
+      });
+    });  // End options.separator
+
+
+    // --- fractionOfMax ---
+    describe("and a custom fractionOfMax (with options.fractionOfMax)", function() {
+      it("should use the custom value in place of the default one", function() {
+
+        // This test assumes a default fractionOfMax value of not matching the results of 0.5
+        var defaultResult = axe( '123123', 5 ),  // ["123-", "123"]
+            customResult  = axe( '123123', 5, {fractionOfMax: 0.5} );
+
+        expect( customResult ).toEqual( ['1231-', '23'] );
+        expect( customResult ).not.toEqual( defaultResult );
+
+      });
+    });  // End options.fractionOfMax
+
+
+    // --- redistribute ---
+    describe("and options.redistribute doesn't generate errors", function() {
+      it("should do be used instead of the default", function() {
+
+        var defaultResult = axe( '1234567', 6);  // ["123-", "4567"],
+            custom = function ( currentChunksMap ) { return currentChunksMap; },
+            customResult  = axe( '1234567', 6, {redistribute: custom} ),
+        // The 6 is left off because separator is '-' and is accounted for, but then never used
+        expect( customResult ).toEqual( ['12345'] );
+        expect( customResult ).not.toEqual( defaultResult );
+
+      });
+    });  // End options.redistribute
+
   });  // End "expected types"
 
-
-      // expect( axe( '123', 3, {separator: '--'} ) ).toEqual( ['1--', '2--', '3'] );    (separator plain test)
-      // expect( axe( '123', 3, {separator: ''} ) ).toEqual( ['1--', '2--', '3'] );      (separator empty test)
-      // expect( axe( '123', 3, {separator: 1} ) ).toEqual( ['1--', '2--', '3'] );       (separator non-string test)
-      // expect( axe( '123', 3, {separator: undefined} ) ).toEqual( ['1--', '2--', '3'] );   (separator undefined test)
-      // expect( axe( '123', 3, {separator: null} ) ).toEqual( ['1--', '2--', '3'] );    (separator null test)
-      // expect( axe( '123', 3, {separator: '**'} ) ).toEqual( ['1**', '2**', '3'] );    (regex escape test)
-      // expect( axe( '1--23', 3, {separator: '--'} ) ).toEqual( ['1--', '23'] );      (separator interference test)
-      // expect( axe( '123123', 5, {fractionOfMax: 0.5} ) ).toEqual( ['1231-', '23'] );    (fractionOfMax plain test)
-      // expect( axe( '123123', 5, {fractionOfMax: '2'} ) ).toEqual( ['1231-', '23'] );    (fractionOfMax non-int test)
-      // expect( axe( '123123', 5, {fractionOfMax: undefined} ) ).toEqual( ['1231-', '23'] ); (fractionOfMax undefined test)
-      // expect( axe( '123123', 5, {fractionOfMax: null} ) ).toEqual( ['1231-', '23'] );   (fractionOfMax null test)
-
-});
+});  // End hyperaxe
