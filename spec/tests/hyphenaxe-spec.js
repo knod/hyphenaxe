@@ -1,263 +1,419 @@
-describe("hyphenaxe", function() {
+describe("hyphenaxe,", function() {
 
   var axe = require('../../lib/hyphenaxe.js');
 
-  describe("is given _TWO ARGUMENTS_ with at least one having an _UNEXPECTED TYPE_", function() {
 
-    // describe("and the first argument is a non-string value", function() {
-    //   it('should return that value', function() {
-    //     expect( axe( undefined, 2 ) ).toEqual( undefined );  // X
-    //     expect( axe( null,      2 ) ).toEqual( null );
-    //     expect( axe( 0,         2 ) ).toEqual( 0 );  // Should error?
-    //     expect( axe( 1,         2 ) ).toEqual( 1 );  // Should error?
-    //     expect( axe( 3,         2 ) ).toEqual( 3 );  // Should error?
-    //     expect( axe( -3,        2 ) ).toEqual( -3 );  // Should error?
-    //   });
-    // });
-
-    // describe("and the second argument is a non-int value", function() {
-    //   it('should throw an error', function() {  // warning? error?
-    //     expect( axe( 'test', undefined  ) ).toThrow(  );  // X
-    //     expect( axe( 'test', null       ) ).toThrow(  );
-    //     expect( axe( 'test', 0.5        ) ).toThrow(  );
-    //     expect( axe( 'test', 'string'   ) ).toThrow(  );
-    //     expect( axe( 'test', '0'        ) ).toThrow(  );
-    //     expect( axe( 'test', '1'        ) ).toThrow(  );
-    //     expect( axe( 'test', '2'        ) ).toThrow(  );
-    //   });
-    // });
-
-    // describe("and the second argument is a negative integer", function() {
-    //   it('should... throw an error?', function() {  // null? error?
-    //     expect( axe( 'test', -1 ) ).toThrow(  );  // X
-    //     expect( axe( 'test', -5 ) ).toThrow(  );
-    //   });
-    // });
-
-    // // ??: How to handle?
-    // describe("both arguments are of unexpected types", function() {
-    //   it('should fail from first to last, at the first error encountered', function() {
-    //     expect( axe( undefined, undefined ) ).toThrow(  );
-    //     expect( axe( null,      0.5       ) ).toEqual( null );
-    //     expect( axe( 0,         'string'  ) ).toEqual( 0 );  // Should error on first or second?
-    //     expect( axe( 1,         -5        ) ).toEqual( 1 );  // Should error on first or second?
-    //   });
-    // });
-    
-
-  });  // End "Two arguments: unexpected types"
-
-
-
-  // WITH `tooBig` THE CODE IS MUCH HARDER TO READ, BUT IT DOES HAVE TO BE TESTED...
-  // `afterEach()` won't help, because that's just after a spec
-  var tooBig = function ( strings, max ) {
-  /* ( [str], int ) -> Bool
-  * 
-  * If any string in `strings` > max, returns true
-  * Otherwise returns false
-  */
-    var tooBig = false;
-    for (let stri = 0; stri < strings.length; stri++) {
-      // If one is too big, we're done
-      if ( strings[ stri ].length > max ) {
-        tooBig = true;
-        break;
-      }
+  var isAnArrayOfStrings = function ( maybeArr ) {
+  // Return true if an array contains only strings, otherwise false
+    if( Object.prototype.toString.call( maybeArr ) !== '[object Array]' ) {
+        return false;
     }
 
-    return tooBig;
-  };  // End tooBig()
-
-  // describe("is given _ARGUMENTS_ wit _EXPECTED TYPES_ of the format ( str, int ), no string in the returned array should ever be longer than `int` and", function() {
-  //   describe("when given _TWO ARGUMENTS_", function() {
-
-  describe("is given _TWO ARGUMENTS_ with _EXPECTED TYPES_ of the format ( str, int ), no string in the returned array should ever be longer than `int` and", function() {
-
-    // should return an array of strings
-
-    var max, result;
-    beforeEach( function() { max = null; result = null; } );
-
-    describe("the length of each string in the returned array should be affected by the value of `int` (the maximum number of characters per string).", function() {
-
-      // length should never be greater than `int`
-
-      describe("When `int` is 0", function() {
-        it('should return [""]', function() {  // ?
-          // expect( axe( 'test', 0 ) ).toEqual( [''] );
-          max = 0, result = axe( 'test', max )
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( [''] );  // ? []? null? error?
-        });
-      });
-
-      describe("When `int` is 1", function() {
-        it('should return single character strings with no hyphen/separator', function() {
-          // expect( axe( '123', 1 ) ).toEqual( ['1', '2', '3'] );
-          max = 1, result = axe( '123', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['1', '2', '3'] );
-        });
-      });
-
-      describe("When `str.length <= int`", function() {
-        it('should return [ str ]', function() {
-
-          // expect( axe( '1',    2    ) ).toEqual( ['1'] );
-          // expect( axe( '12',   2    ) ).toEqual( ['12'] );
-          // expect( axe( '123',  3    ) ).toEqual( ['123'] );
-          // expect( axe( '123',  105  ) ).toEqual( ['123'] );
-
-          max = 2, result = axe( '1', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['1'] );
-
-          max = 2, result = axe( '12', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['12'] );
-
-          max = 3, result = axe( '123', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['123'] );
-
-          max = 105, result = axe( '123', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['123'] );
-
-        });
-      });
-
-      describe("When `str.length > int`", function() {
-        it('should return [ String ], where `str` has been separated into parts no longer than `int` and, all except the last part, been terminated with a hyphen (which will be counted as part of the length)', function() {
-          // expect( axe( '123123', 3) ).toEqual( ['12-', '31-', '23'] );
-          max = 3, result = axe( '123123', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['12-', '31-', '23'] );
-        });
-      });
-
-      describe("When the last character group is LESS THAN ~75% OF `int`", function() {
-        it('should make sure that the number of characters per string group is decently evenly distributed (the last group should have a length no less than ~75% of `int`)', function() {
-          // expect( axe( '123123123123',  6 ) ).toEqual( ['1231-', '2312-', '3123'] );
-          // expect( axe( '123123',        5 ) ).toEqual( ['123-', '123'] );
-          max = 6, result = axe( '123123123123', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['1231-', '2312-', '3123'] );
-
-          max = 5, result = axe( '123123', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['123-', '123'] );
-          // TODO: more examples?
-        });
-      });
-
-      describe("when given ( str, int ) where `str.length > int` where, accounting for the added length of the hyphens/separators, the last character group length is EQUAL TO OR GREATER THAN ~75% of `int`", function() {
-        it('should end up with the last character group length remaining at that value', function() {
-          // expect( axe( '123',       2 ) ).toEqual( ['1-', '23'] );
-          // expect( axe( '123123123', 3 ) ).toEqual( ['12-', '31-', '23-', '123'] );
-          // expect( axe( '1231',      3 ) ).toEqual( ['12-', '31'] );
-          max = 2, result = axe( '123', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['1-', '23'] );
-
-          max = 3, result = axe( '123123123', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['12-', '31-', '23-', '123'] );
-
-          max = 3, result = axe( '1231', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['12-', '31'] );
-        });
-      });
-
-      describe("when given ( str, int ) where `str.length > int` where, accounting for the added length of the hyphens/separators, the last character group is EQUAL TO `int` MINUS THE LENGTH OF THE SEPARATOR", function() {
-        it('should end up with the last character group length being equal to: `int - separator.length`', function() {
-          // expect( axe( '123123', 3 ) ).toEqual( ['12-', '31-', '23'] );
-          max = 3, result = axe( '123123', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['12-', '31-', '23'] );
-        });
-      });
-
-    });  // End length of the string/word vs. value of max number of characters
+    var allAreStrings = true;
+    for (var indx = 0; indx < maybeArr.length; indx++) {
+       if ( typeof maybeArr[indx] !== 'string' ) { allAreStrings = false;}
+    };
+    return allAreStrings;
+  };  // End isAnArrayOfStrings()
 
 
+  describe("given", function() {
 
-    describe("when given ( str, int ) where those values are such that the string has a hyphen (or whatever separator) on a boundry", function() {
-      it('should not repeat the hyphen/separator', function() {
-        // expect( axe( '1-23',   3 ) ).toEqual( ['1-', '23'] );
-        // expect( axe( '1--2',  3 ) ).toEqual( ['1-', '-2'] );
-        // expect( axe( '12-31', 3 ) ).toEqual( ['12-', '31'] );
-          max = 3, result = axe( '1-23', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['1-', '23'] );
-
-          max = 3, result = axe( '1--2', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['1-', '-2'] );
+    describe("a NON-STRING value for a first argument,", function() {
+      it('should throw a TYPE error', function() {
+        expect( function() {axe( undefined, 2 )} ).toThrowError( TypeError, /The first argument/ );
+        expect( function() {axe( null,      2 )} ).toThrowError( TypeError, /The first argument/ );
+        expect( function() {axe( true,      2 )} ).toThrowError( TypeError, /The first argument/ );
+        expect( function() {axe( false,     2 )} ).toThrowError( TypeError, /The first argument/ );
+        expect( function() {axe( {},        2 )} ).toThrowError( TypeError, /The first argument/ );
+        expect( function() {axe( [],        2 )} ).toThrowError( TypeError, /The first argument/ );
+        expect( function() {axe( 0,         2 )} ).toThrowError( TypeError, /The first argument/ );
+        expect( function() {axe( 1,         2 )} ).toThrowError( TypeError, /The first argument/ );
+        expect( function() {axe( 3,         2 )} ).toThrowError( TypeError, /The first argument/ );
+        expect( function() {axe( -3,        2 )} ).toThrowError( TypeError, /The first argument/ );
       });
     });
 
-    describe("when given a string with punctuation", function() {
-      it('should treat punctuation or spaces or tabs just like any other character', function() {
-        // expect( axe( '1.2',   2 ) ).toEqual( ['1-', '.2'] );
-        // expect( axe( '1 2',   2 ) ).toEqual( ['1-', ' 2'] );
-        // expect( axe( '1\t2',  2 ) ).toEqual( ['1-', '\t2'] );
-          max = 2, result = axe( '1.2', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['1-', '.2'] );
-
-          max = 2, result = axe( '1 2', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['1-', ' 2'] );
-
-          max = 2, result = axe( '1\t2', max );
-          expect( tooBig(result, max) ).toBe( false );
-          expect( result ).toEqual( ['1-', '\t2'] );
+    describe("a NON-NUMBER value for a second argument (should be a positive integer > 0),", function() {
+      it('should throw a TYPE error', function() {  // ??: Accept parsable string as second argument
+        expect( function() {axe( 'test', undefined  )} ).toThrowError( TypeError, /The second argument/ );
+        expect( function() {axe( 'test', null       )} ).toThrowError( TypeError, /The second argument/ );
+        expect( function() {axe( 'test', true       )} ).toThrowError( TypeError, /The second argument/ );
+        expect( function() {axe( 'test', false      )} ).toThrowError( TypeError, /The second argument/ );
+        expect( function() {axe( 'test', 'thing'    )} ).toThrowError( TypeError, /The second argument/ );
+        expect( function() {axe( 'test', '0'        )} ).toThrowError( TypeError, /The second argument/ );
+        expect( function() {axe( 'test', '1'        )} ).toThrowError( TypeError, /The second argument/ );
+        expect( function() {axe( 'test', '2'        )} ).toThrowError( TypeError, /The second argument/ );
+        expect( function() {axe( 'test', {}         )} ).toThrowError( TypeError, /The second argument/ );
+        expect( function() {axe( 'test', []         )} ).toThrowError( TypeError, /The second argument/ );
       });
     });
 
-    // ??: What about new lines?
+    describe("a NON-INTEGER number for a second argument (should be a positive integer > 0),", function() {
+      it('should throw a RANGE error', function() {
+        expect( function() {axe( 'test', 0.5  )} ).toThrowError( RangeError, /The second argument/ );
+        expect( function() {axe( 'test', -0.5 )} ).toThrowError( RangeError, /The second argument/ );
+      });
+    });
 
-  });  // End "Two arguments: expected types"
+    describe("a NEGATIVE INTEGER for a second argument (should be a positive integer > 0),", function() {
+      it('should throw a RANGE error', function() {
+        expect( function() {axe( 'test', -1 )} ).toThrowError( RangeError, /The second argument/ );
+        expect( function() {axe( 'test', -3 )} ).toThrowError( RangeError, /The second argument/ );
+      });
+    });
 
+    describe("0 for a second argument (should be a positive integer > 0),", function() {
+      it('should throw a RANGE error', function() {
+        expect( function() {axe( 'test', 0 )} ).toThrowError( RangeError, /The second argument/ );
+      });
+    });
 
+    describe("INVALID inputs for both of the first two arguments (should be a string followed by a positive integer > 0),", function() {
+      it('should fail from first to last, at the first error encountered', function() {
+        expect( function() {axe( undefined, undefined )} ).toThrowError( TypeError, /The first argument/ );
+        expect( function() {axe( null,      0.5       )} ).toThrowError( TypeError, /The first argument/ );
+        expect( function() {axe( 0,         'thing'   )} ).toThrowError( TypeError, /The first argument/ );
+        expect( function() {axe( 1,         -3        )} ).toThrowError( TypeError, /The first argument/ );
+        expect( function() {axe( true,      -3        )} ).toThrowError( TypeError, /The first argument/ );
+      });
+    });
 
-  describe("Custom user options", function() {
-
-    describe("options.separator: Unexpected type", function() {
-      it('should throw an error', function() {
-        expect( axe( '1.2',  2 ) ).toEqual( ['1-', '.2'] );
+    // ========== CUSTOM OPTIONS ==========
+    describe("a NON-STRING value for userOptions.separator,", function() {
+      it('should throw a TYPE error', function() {
+        expect( function() {axe( 'test',  2, {separator: undefined} )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {separator: null     } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {separator: true     } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {separator: false    } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {separator: {}       } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {separator: []       } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {separator: 0        } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {separator: 1        } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {separator: 5        } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {separator: -1       } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {separator: 1.1      } )} ).toThrowError( TypeError, /Your userOptions value/ );
       });
 
     });  // End "options.separator: Unexpected type"
 
-    describe("options.separator: expected type", function() {
+    describe("a NON-NUMBER value for options.fractionOfMax (should be an integer that is <= 1 and > 0),", function() {
+      it('should throw a TYPE error', function() {
+        expect( function() {axe( 'test',  2, {fractionOfMax: undefined} )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {fractionOfMax: null     } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {fractionOfMax: true     } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {fractionOfMax: false    } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {fractionOfMax: {}       } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {fractionOfMax: []       } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        expect( function() {axe( 'test',  2, {fractionOfMax: 'test'   } )} ).toThrowError( TypeError, /Your userOptions value/ );
+      });
+    });
 
-    });  // End "options.separator: expected type"
-
-
-
-    describe("options.fractionOfMax: Unexpected type", function() {
-
+    describe("a NUMBER > 1 for options.fractionOfMax (should be an integer that is <= 1 and > 0),", function() {
+      it('should throw a RANGE error', function() {
+        expect( function() {axe( 'test',  2, {fractionOfMax: 5   } )} ).toThrowError( RangeError, /fractionOfMax/ );
+        expect( function() {axe( 'test',  2, {fractionOfMax: 1.1 } )} ).toThrowError( RangeError, /fractionOfMax/ );
+      });
     });  // End "options.fractionOfMax: Unexpected type"
 
-    describe("options.fractionOfMax: expected type", function() {
+    describe("0 for options.fractionOfMax (should be an integer that is <= 1 and > 0),", function() {
+      it('should throw a RANGE error', function() {
+        expect( function() {axe( 'test',  2, {fractionOfMax: 0 } )} ).toThrowError( RangeError, /fractionOfMax/ );
+      });
+    });  // End "options.fractionOfMax: Unexpected type"
 
-    });  // End "options.fractionOfMax: expected type"
+    describe("a NEGATIVE NUMBER for options.fractionOfMax (should be an integer that is <= 1 and > 0),", function() {
+      it('should throw a RANGE error', function() {
+        expect( function() {axe( 'test',  2, {fractionOfMax: -1   } )} ).toThrowError( RangeError, /fractionOfMax/ );
+        expect( function() {axe( 'test',  2, {fractionOfMax: -1.1 } )} ).toThrowError( RangeError, /fractionOfMax/ );
+      });
+    });  // End "options.fractionOfMax: Unexpected type"
 
+    describe("a NEGATIVE NUMBER for options.fractionOfMax (should be an integer that is <= 1 and > 0),", function() {
+      it('should throw a RANGE error', function() {
+        expect( function() {axe( 'test',  2, {fractionOfMax: 0        } )} ).toThrowError( RangeError, /fractionOfMax/ );
+        expect( function() {axe( 'test',  2, {fractionOfMax: 5        } )} ).toThrowError( RangeError, /fractionOfMax/ );
+        expect( function() {axe( 'test',  2, {fractionOfMax: -1       } )} ).toThrowError( RangeError, /fractionOfMax/ );
+      });
+    });  // End "options.fractionOfMax: Unexpected type"
 
+    describe(", for options.redistribute,", function() {
+      // Should also take no more than 3 arguments...?
 
-    describe("options.redistribute: Unexpected type", function() {
+      describe("a NON-FUNCTION,", function() {
+        it('should throw an error', function() {
+          expect( function() {axe( 'test',  2, {redistribute: undefined} )} ).toThrowError( TypeError, /Your userOptions value/ );
+          expect( function() {axe( 'test',  2, {redistribute: null     } )} ).toThrowError( TypeError, /Your userOptions value/ );
+          expect( function() {axe( 'test',  2, {redistribute: true     } )} ).toThrowError( TypeError, /Your userOptions value/ );
+          expect( function() {axe( 'test',  2, {redistribute: false    } )} ).toThrowError( TypeError, /Your userOptions value/ );
+          expect( function() {axe( 'test',  2, {redistribute: {}       } )} ).toThrowError( TypeError, /Your userOptions value/ );
+          expect( function() {axe( 'test',  2, {redistribute: []       } )} ).toThrowError( TypeError, /Your userOptions value/ );
+          expect( function() {axe( 'test',  2, {redistribute: 'test'   } )} ).toThrowError( TypeError, /Your userOptions value/ );
+          expect( function() {axe( 'test',  2, {redistribute: 0        } )} ).toThrowError( TypeError, /Your userOptions value/ );
+          expect( function() {axe( 'test',  2, {redistribute: 5        } )} ).toThrowError( TypeError, /Your userOptions value/ );
+          expect( function() {axe( 'test',  2, {redistribute: -1       } )} ).toThrowError( TypeError, /Your userOptions value/ );
+          expect( function() {axe( 'test',  2, {redistribute: 1.1      } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        });
+      });
+
+      var custom, func;
+
+      describe("a function that DOESN'T return an ARRAY,", function() {
+        it('should throw a TYPE error', function() {
+
+          custom = function () { return undefined; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return null; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return true; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return false; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return {}; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return 'a string'; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return 0; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return 1; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return 5; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return -1; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return 0.5; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+
+        });
+      });  // End options.redistribute return not array
+
+      describe("a function that returns an array containing a NON-NUMBER (should return an array of integers > 0),", function() {
+        it('should throw a TYPE error', function() {
+
+          custom = function () { return [2, undefined]; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return [2, null]; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return [2, true]; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return [2, false]; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return [2, {}]; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return [2, []]; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+          
+          custom = function () { return [2, 'a string']; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( TypeError, /redistribution/ );
+
+        });
+      });  // End options.redistribute return array with item !== num
+
+      describe("a function that returns an array containing a NON-INTEGER number (should return an array of integers > 0),", function() {
+        it('should throw a RANGE error', function() {
+          custom = function () { return [2, 0.5]; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( RangeError, /redistribution/ );
+
+          custom = function () { return [2, 1.5]; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( RangeError, /redistribution/ );
+        });
+      });  // End options.redistribute return array with item !== int
+
+      describe("a function that returns an array containing an NEGATIVE NUMBER (should return an array of integers > 0),", function() {
+        it('should throw a RANGE error', function() {
+          custom = function () { return [2, -1]; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( RangeError, /redistribution/ );
+
+          custom = function () { return [2, -1.5]; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( RangeError, /redistribution/ );
+
+          custom = function () { return [2, -0.5]; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( RangeError, /redistribution/ );
+        });
+      });  // End options.redistribute return array with item !== positive int
+
+      describe("a function that returns an array containing 0 (should return an array of integers > 0),", function() {
+        it('should throw a RANGE error', function() {
+          custom = function () { return [2, 0]; }
+          func   = function () { isAnArrayOfStrings( axe( 'tests',  4, {redistribute: custom} ) ) }
+          expect( func ).toThrowError( RangeError, /redistribution/ );
+        });
+      });  // End options.redistribute return array with item !== non-zero
 
     });  // End "options.redistribute: Unexpected type"
 
-    describe("options.redistribute: expected type", function() {
+  });  // End _UNEXPECTED TYPE_
 
-    });  // End "options.redistribute: expected type"
 
-  });  // End "Custom user options"
+
+
+  describe("given a string 'str' and a positive integer 'posInt',", function() {
+
+    it('should return an array of strings', function() {  // ?
+      expect( isAnArrayOfStrings( axe( 'test', 3 ) ) ).toBe( true );  // ? []? null? error?
+    });
+
+
+    // ========= IRREGULARS =========
+    describe("where `posInt` is 1,", function() {
+      it('should return single character strings with no hyphen/separator', function() {
+        expect( axe( '123', 1 ) ).toEqual( ['1', '2', '3'] );
+      });
+    });
+
+    describe("where `str.length <= posInt`,", function() {
+      it('should return [ str ]', function() {
+
+        expect( axe( '1',    2    ) ).toEqual( ['1'] );
+        expect( axe( '12',   2    ) ).toEqual( ['12'] );
+        expect( axe( '123',  3    ) ).toEqual( ['123'] );
+        expect( axe( '123',  105  ) ).toEqual( ['123'] );
+
+      });
+    });
+
+
+    // ========= REGULARS =========
+    var isTooBig = function ( strings, max ) {
+    /* ( [str], int ) -> Bool
+    * If any string in `strings` > max, returns true. Otherwise returns false
+    */
+      var tooBig = false;
+
+      for (let stri = 0; stri < strings.length; stri++) {
+        if ( strings[ stri ].length > max ) {
+          tooBig = true;
+          break;  // If one is too big, we're done
+        }
+      }
+
+      return tooBig;
+    };  // End isTooBig()
+
+
+    describe("where `str.length > posInt`", function() {
+
+      it("should return an array of strings in which no individual string is ever longer than `posInt`", function() {
+          var max = 3, result = axe( '123123', max );
+          expect( isTooBig( result ) ).toEqual( false );
+          // Other tests?
+      });
+
+      it("should return an array of strings in which every string except the last one is terminated with a hyphen", function() {
+          var max = 3, result = axe( '123123', max );
+          expect( result ).toEqual( ['12-', '31-', '23'] );
+          // Other tests?
+      });
+
+      describe("and the last array string length is LESS THAN ~75% OF `posInt`,", function() {
+        it('should make sure that the number of characters per string group is decently evenly distributed (the last group should have a length no less than ~75% of `posInt`)', function() {
+          
+          expect( axe( '123123123123',  6 ) ).toEqual( ['1231-', '2312-', '3123'] );
+          expect( axe( '123123',        5 ) ).toEqual( ['123-', '123'] );
+          // TODO: more examples?
+
+        });
+      });
+
+      describe("and the last array string length is EQUAL TO OR GREATER THAN ~75% of `posInt`,", function() {
+        it('should end up with the last character group length remaining at that value', function() {
+
+          expect( axe( '123',       2 ) ).toEqual( ['1-', '23'] );
+          expect( axe( '123123123', 3 ) ).toEqual( ['12-', '31-', '23-', '123'] );
+          expect( axe( '1231',      3 ) ).toEqual( ['12-', '31'] );
+
+        });
+      });
+
+      describe("and the last character group is EQUAL TO `posInt` MINUS THE LENGTH OF THE SEPARATOR,", function() {
+        it('should end up with the last character group length being equal to `posInt - separator.length`', function() {
+          // Yes, this was an issue that had to be accounted for
+          expect( axe( '123123', 3 ) ).toEqual( ['12-', '31-', '23'] );
+        });
+      });
+
+      describe("and a string has a hyphen/separator on a boundry,", function() {
+        it('should not repeat the hyphen/separator', function() {
+
+          expect( axe( '1-23', 3 ) ).toEqual( ['1-', '23'] );
+          expect( axe( '1--2', 3 ) ).toEqual( ['1-', '-2'] );
+          expect( axe( '1-23', 3 ) ).toEqual( ['1-', '23'] );
+
+        });
+      });
+
+      describe("when given a string with punctuation or spaces or tabs,", function() {
+        it('should treat those characters just like any other character', function() {
+
+          expect( axe( '1.2',   2 ) ).toEqual( ['1-', '.2'] );
+          expect( axe( '1 2',   2 ) ).toEqual( ['1-', ' 2'] );
+          expect( axe( '1\t2',  2 ) ).toEqual( ['1-', '\t2'] );
+
+        });
+      });
+
+      // ??: What about new lines?
+
+      // ========== CUSTOM OPTIONS ==========
+      describe("options.separator: expected type", function() {
+
+      });  // End "options.separator: expected type"
+
+
+
+      describe("options.fractionOfMax: expected type", function() {
+
+      });  // End "options.fractionOfMax: expected type"
+
+
+
+      describe("options.redistribute: expected type", function() {
+
+      });  // End "options.redistribute: expected type"
+
+    });  // End "where `str.length > posInt`"
+
+
+  });  // End "expected types"
+
 
       // expect( axe( '123', 3, {separator: '--'} ) ).toEqual( ['1--', '2--', '3'] );    (separator plain test)
       // expect( axe( '123', 3, {separator: ''} ) ).toEqual( ['1--', '2--', '3'] );      (separator empty test)
@@ -270,6 +426,5 @@ describe("hyphenaxe", function() {
       // expect( axe( '123123', 5, {fractionOfMax: '2'} ) ).toEqual( ['1231-', '23'] );    (fractionOfMax non-int test)
       // expect( axe( '123123', 5, {fractionOfMax: undefined} ) ).toEqual( ['1231-', '23'] ); (fractionOfMax undefined test)
       // expect( axe( '123123', 5, {fractionOfMax: null} ) ).toEqual( ['1231-', '23'] );   (fractionOfMax null test)
-
 
 });
