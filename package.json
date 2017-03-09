@@ -1,6 +1,6 @@
 {
   "name": "@knod/hyphenaxe",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Crudely splits a one-word string into a list of pre-hyphenated strings by desired max number of characters per unit, not by syllable or prefix/suffix",
   "main": "hyphenaxe.js",
   "scripts": {
