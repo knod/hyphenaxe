@@ -58,6 +58,8 @@ User option defaults are:
 npm install --save @knod/hyphenaxe
 ```
 
+##Misc
+
 MIT License
 
 Issues and pull requests welcome
