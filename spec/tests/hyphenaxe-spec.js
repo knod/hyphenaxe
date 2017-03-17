@@ -465,4 +465,4 @@ describe("hyphenaxe,", function() {
 
   });  // End "expected types"
 
-});  // End hyperaxe
+});  // End hyphenaxe
