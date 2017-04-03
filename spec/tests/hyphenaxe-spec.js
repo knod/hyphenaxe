@@ -82,8 +82,8 @@ describe("hyphenaxe,", function() {
     // ========== CUSTOM OPTIONS ==========
     describe("a NON-STRING value for userOptions.separator,", function() {
       it('should throw a TYPE error', function() {
-        expect( function() {axe( 'test',  2, {separator: undefined} )} ).toThrowError( TypeError, /Your userOptions value/ );
-        expect( function() {axe( 'test',  2, {separator: null     } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        // `undefined` has a pass until a reason is discovered to kill it
+        // `null` is a way of deleting a previous value
         expect( function() {axe( 'test',  2, {separator: true     } )} ).toThrowError( TypeError, /Your userOptions value/ );
         expect( function() {axe( 'test',  2, {separator: false    } )} ).toThrowError( TypeError, /Your userOptions value/ );
         expect( function() {axe( 'test',  2, {separator: {}       } )} ).toThrowError( TypeError, /Your userOptions value/ );
@@ -99,8 +99,8 @@ describe("hyphenaxe,", function() {
 
     describe("a NON-NUMBER value for options.fractionOfMax (should be an integer that is <= 1 and > 0),", function() {
       it('should throw a TYPE error', function() {
-        expect( function() {axe( 'test',  2, {fractionOfMax: undefined} )} ).toThrowError( TypeError, /Your userOptions value/ );
-        expect( function() {axe( 'test',  2, {fractionOfMax: null     } )} ).toThrowError( TypeError, /Your userOptions value/ );
+        // `undefined` has a pass until a reason is discovered to kill it
+        // `null` is a way of deleting a previous value
         expect( function() {axe( 'test',  2, {fractionOfMax: true     } )} ).toThrowError( TypeError, /Your userOptions value/ );
         expect( function() {axe( 'test',  2, {fractionOfMax: false    } )} ).toThrowError( TypeError, /Your userOptions value/ );
         expect( function() {axe( 'test',  2, {fractionOfMax: {}       } )} ).toThrowError( TypeError, /Your userOptions value/ );
@@ -142,8 +142,8 @@ describe("hyphenaxe,", function() {
 
       describe("a NON-FUNCTION,", function() {
         it('should throw an error', function() {
-          expect( function() {axe( 'test',  2, {redistribute: undefined} )} ).toThrowError( TypeError, /Your userOptions value/ );
-          expect( function() {axe( 'test',  2, {redistribute: null     } )} ).toThrowError( TypeError, /Your userOptions value/ );
+          // `undefined` has a pass until a reason is discovered to kill it
+          // `null` is a way of deleting a previous value
           expect( function() {axe( 'test',  2, {redistribute: true     } )} ).toThrowError( TypeError, /Your userOptions value/ );
           expect( function() {axe( 'test',  2, {redistribute: false    } )} ).toThrowError( TypeError, /Your userOptions value/ );
           expect( function() {axe( 'test',  2, {redistribute: {}       } )} ).toThrowError( TypeError, /Your userOptions value/ );
@@ -453,15 +453,75 @@ describe("hyphenaxe,", function() {
     describe("and options.redistribute doesn't generate errors", function() {
       it("should do be used instead of the default", function() {
 
-        var defaultResult = axe( '1234567', 6);  // ["123-", "4567"],
-            custom = function ( currentChunksMap ) { return currentChunksMap; },
-            customResult  = axe( '1234567', 6, {redistribute: custom} ),
+        var defaultResult = axe( '1234567', 6),  // ["123-", "4567"]
+            custom        = function ( currentChunksMap ) { return currentChunksMap; },
+            customResult  = axe( '1234567', 6, {redistribute: custom} );
         // The 6 is left off because separator is '-' and is accounted for, but then never used
         expect( customResult ).toEqual( ['12345'] );
         expect( customResult ).not.toEqual( defaultResult );
 
       });
     });  // End options.redistribute
+
+    // --- null ---
+    describe("and a custom `.separator` with a value of `null`", function() {
+      it("should use the defualt separator", function() {
+        expect( axe( '123', 2, {separator: null} ) ).toEqual( ['1-', '23'] );
+      });
+    });  // End options.separator null
+
+    describe("and a custom `.fractionOfMax` with a value of `null`", function() {
+      it("should use the defualt `.fractionOfMax`", function() {
+
+        var defaultResult = axe( '123123', 5 ),  // ["123-", "123"]
+            customResult  = axe( '123123', 5, {fractionOfMax: null} );
+
+        expect( customResult ).toEqual( ["123-", "123"] );
+        expect( customResult ).toEqual( defaultResult );
+
+      });
+    });  // End options.fractionOfMax null
+
+    describe("and a custom `.redistribute` with a value of `null`", function() {
+      it("should use the defualt `.redistribute`", function() {
+
+        var defaultResult = axe( '1234567', 6),  // ["123-", "4567"]
+            customResult  = axe( '1234567', 6, {redistribute: null} );
+        expect( customResult ).toEqual( ["123-", "4567"] );
+        expect( customResult ).toEqual( defaultResult );
+
+      });
+    });  // End options.redistribute null
+
+    // --- undefined ---
+    describe("and a custom `.separator` with a value of `undefined`", function() {
+      it("should use the defualt separator", function() {
+        expect( axe( '123', 2, {separator: undefined} ) ).toEqual( ['1-', '23'] );
+      });
+    });  // End options.separator undefined
+
+    describe("and a custom `.fractionOfMax` with a value of `undefined`", function() {
+      it("should use the defualt `.fractionOfMax`", function() {
+
+        var defaultResult = axe( '123123', 5 ),  // ["123-", "123"]
+            customResult  = axe( '123123', 5, {fractionOfMax: undefined} );
+
+        expect( customResult ).toEqual( ["123-", "123"] );
+        expect( customResult ).toEqual( defaultResult );
+
+      });
+    });  // End options.fractionOfMax undefined
+
+    describe("and a custom `.redistribute` with a value of `undefined`", function() {
+      it("should use the defualt `.redistribute`", function() {
+
+        var defaultResult = axe( '1234567', 6),  // ["123-", "4567"]
+            customResult  = axe( '1234567', 6, {redistribute: undefined} );
+        expect( customResult ).toEqual( ["123-", "4567"] );
+        expect( customResult ).toEqual( defaultResult );
+
+      });
+    });  // End options.redistribute undefined
 
   });  // End "expected types"
 
